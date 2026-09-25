@@ -7,10 +7,11 @@ import { useApp } from '../state/AppState';
 import { colors, fonts, radius, spacing, type } from '../theme';
 
 export default function QuizScreen({ navigation }: StackProps<'Quiz'>) {
-  const { addXp } = useApp();
+  const { award } = useApp();
   const [q, setQ] = useState(0);
   const [picked, setPicked] = useState<Actor | null>(null);
   const [earned, setEarned] = useState(0);
+  const [gotXp, setGotXp] = useState(false);
   const question = quiz[q];
   const correct = picked === question.answer;
   const isLast = q === quiz.length - 1;
@@ -18,10 +19,10 @@ export default function QuizScreen({ navigation }: StackProps<'Quiz'>) {
   const pick = (a: Actor) => {
     if (picked) return;
     setPicked(a);
-    if (a === question.answer) {
-      addXp(10);
-      setEarned((e) => e + 10);
-    }
+    // XP is paid once per question, so going back and re-answering doesn't farm points.
+    const paid = a === question.answer && award(`quiz-${q + 1}`, 10);
+    setGotXp(paid);
+    if (paid) setEarned((e) => e + 10);
   };
 
   const next = () => {
@@ -78,7 +79,7 @@ export default function QuizScreen({ navigation }: StackProps<'Quiz'>) {
       {picked ? (
         <View style={[styles.feedback, { borderColor: correct ? colors.borderSuccess : colors.bgDanger }]}>
           <Text style={[type.headingS, { color: correct ? colors.textSuccess : colors.textDanger }]}>
-            {correct ? 'Верно! +10 XP' : 'Не совсем'}
+            {correct ? (gotXp ? 'Верно! +10 XP' : 'Верно! XP за этот вопрос уже получен.') : 'Не совсем'}
           </Text>
           <Text style={[type.bodyM, { color: colors.textPrimary }]}>{question.explanation}</Text>
         </View>

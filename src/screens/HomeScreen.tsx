@@ -4,7 +4,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Chip, Gap, ProgressBar, Screen } from '../components/ui';
 import { RootStackParamList, TabParamList } from '../navigation/types';
-import { checkQuestions, levelNames, Skill, skillNames } from '../data/content';
+import { checkQuestions, levelNames, modules, Skill, skillNames } from '../data/content';
+import { course, currentTask, taskId, taskRefs } from '../data/course';
 import { assessmentLevel, levelInfo, useApp, XP_PER_LEVEL } from '../state/AppState';
 import { colors, fonts, radius, spacing, type } from '../theme';
 
@@ -14,7 +15,11 @@ type Props = CompositeScreenProps<
 >;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { name, xp, lessonProgress, interests, assessment } = useApp();
+  const { name, xp, interests, assessment, completed, cursor } = useApp();
+  const current = currentTask(completed, cursor);
+  const lesson = current ? course[current.module].lessons[current.lesson] : null;
+  const lessonDone = current && lesson ? lesson.tasks.filter((_, i) => completed.includes(taskId(current.module, current.lesson, i))).length : 0;
+  const doneIn = (module: number) => taskRefs.filter((r) => r.module === module - 1 && completed.includes(r.id)).length;
   const lvl = levelInfo(xp);
   const level = assessment ? assessmentLevel(assessment.filter(Boolean).length, assessment.length) : null;
 
@@ -25,10 +30,10 @@ export default function HomeScreen({ navigation }: Props) {
     return Math.min(100, 20 + Math.round((right / Math.max(1, idx.length)) * 50) + bonus);
   };
   const skills = [
-    { name: skillNames.prompting, value: skillValue('prompting'), color: colors.bgBrand },
-    { name: skillNames.critical, value: skillValue('critical', (lessonProgress - 3) * 5), color: colors.bgDanger },
+    { name: skillNames.prompting, value: skillValue('prompting', doneIn(3) * 4), color: colors.bgBrand },
+    { name: skillNames.critical, value: skillValue('critical', doneIn(1) * 4), color: colors.bgDanger },
     { name: skillNames.logic, value: skillValue('logic'), color: colors.bgInfo },
-    { name: skillNames.problem, value: skillValue('problem'), color: colors.bgAccent },
+    { name: skillNames.problem, value: skillValue('problem', doneIn(2) * 4), color: colors.bgAccent },
   ];
 
   return (
@@ -60,15 +65,30 @@ export default function HomeScreen({ navigation }: Props) {
       <Gap h={spacing.sm} />
 
       <View style={styles.module}>
-        <Text style={[type.overline, { color: colors.bgAccent }]}>МОДУЛЬ 1 · AI WORLD</Text>
-        <Text style={[type.headingM, { color: colors.textOnBrand }]}>Урок 3. Можно ли верить AI?</Text>
-        <View style={styles.progressRow}>
-          <View style={{ flex: 1 }}>
-            <ProgressBar value={lessonProgress * 10} color={colors.bgAccent} track="rgba(255,255,255,0.25)" />
-          </View>
-          <Text style={[type.bodyS, { fontFamily: fonts.bodySemi, color: colors.textOnBrand }]}>{lessonProgress}/10</Text>
-        </View>
-        <Button label="Продолжить" variant="light" size="m" onPress={() => navigation.navigate('Lesson')} />
+        {current && lesson ? (
+          <>
+            <Text style={[type.overline, { color: colors.bgAccent }]}>
+              МОДУЛЬ {current.module + 1} · {modules[current.module].toUpperCase()}
+            </Text>
+            <Text style={[type.headingM, { color: colors.textOnBrand }]}>
+              Урок {current.lesson + 1}. {lesson.title}
+            </Text>
+            <View style={styles.progressRow}>
+              <View style={{ flex: 1 }}>
+                <ProgressBar value={(lessonDone / lesson.tasks.length) * 100} color={colors.bgAccent} track="rgba(255,255,255,0.25)" />
+              </View>
+              <Text style={[type.bodyS, { fontFamily: fonts.bodySemi, color: colors.textOnBrand }]}>
+                {lessonDone}/{lesson.tasks.length}
+              </Text>
+            </View>
+            <Button label="Продолжить" variant="light" size="m" onPress={() => navigation.navigate('Lesson')} />
+          </>
+        ) : (
+          <>
+            <Text style={[type.headingM, { color: colors.textOnBrand }]}>Модули 1–3 пройдены 🎉</Text>
+            <Button label="Мой путь" variant="light" size="m" onPress={() => navigation.navigate('Path')} />
+          </>
+        )}
       </View>
       <Gap h={spacing.sm} />
 

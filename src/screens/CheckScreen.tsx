@@ -9,11 +9,12 @@ import { colors, fonts, radius, spacing, type } from '../theme';
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 export default function CheckScreen({ navigation }: StackProps<'Check'>) {
-  const { addXp, saveAssessment } = useApp();
+  const { award, saveAssessment } = useApp();
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [showResult, setShowResult] = useState(false);
+  const [gotXp, setGotXp] = useState(false);
   const q = checkQuestions[index];
   const correct = picked === q.answer;
   const isLast = index === checkQuestions.length - 1;
@@ -22,7 +23,7 @@ export default function CheckScreen({ navigation }: StackProps<'Check'>) {
     if (picked !== null) return;
     setPicked(i);
     setAnswers((a) => [...a, i === q.answer]);
-    if (i === q.answer) addXp(10);
+    setGotXp(i === q.answer && award(`check-${index + 1}`, 10));
   };
 
   const next = () => {
@@ -86,7 +87,7 @@ export default function CheckScreen({ navigation }: StackProps<'Check'>) {
 
       {picked !== null ? (
         <View style={[styles.feedback, { borderColor: correct ? colors.borderSuccess : colors.bgDanger }]}>
-          <Text style={[type.headingS, { color: correct ? colors.textSuccess : colors.textDanger }]}>{correct ? 'Верно! +10 XP' : 'Не совсем'}</Text>
+          <Text style={[type.headingS, { color: correct ? colors.textSuccess : colors.textDanger }]}>{correct ? (gotXp ? 'Верно! +10 XP' : 'Верно! XP за этот вопрос уже получен.') : 'Не совсем'}</Text>
           <Text style={[type.bodyM, { color: colors.textPrimary }]}>{q.explanation}</Text>
         </View>
       ) : null}

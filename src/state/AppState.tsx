@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useContext, useMemo, useRef, useState } from 'react';
 
 export type AgeGroup = '10-12' | '13-16';
 
@@ -7,13 +7,18 @@ type AppState = {
   age: AgeGroup | null;
   interests: string[];
   xp: number;
-  lessonProgress: number;
-  setAge: (a: AgeGroup) => void;
-  toggleInterest: (i: string) => void;
-  addXp: (n: number) => void;
-  completeLessonTask: () => void;
   /** Onboarding thinking check: one entry per question, true if answered correctly. */
   assessment: boolean[] | null;
+  /** Course task ids the student has finished (solved or saw the explanation). */
+  completed: string[];
+  /** Course task the student is on; null means "first unfinished task". */
+  cursor: string | null;
+  setAge: (a: AgeGroup) => void;
+  toggleInterest: (i: string) => void;
+  /** Adds XP for a question once; returns false if this question was already rewarded. */
+  award: (questionId: string, xp: number) => boolean;
+  completeTask: (taskId: string) => void;
+  setCursor: (taskId: string | null) => void;
   saveAssessment: (answers: boolean[]) => void;
 };
 
@@ -22,9 +27,12 @@ const Ctx = createContext<AppState | null>(null);
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [age, setAge] = useState<AgeGroup | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
-  const [xp, setXp] = useState(290);
-  const [lessonProgress, setLessonProgress] = useState(3);
+  const [xp, setXp] = useState(0);
   const [assessment, saveAssessment] = useState<boolean[] | null>(null);
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  // A ref, not state, so two quick taps can't both pass the "already rewarded" check.
+  const rewarded = useRef(new Set<string>());
 
   const value = useMemo<AppState>(
     () => ({
@@ -32,16 +40,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       age,
       interests,
       xp,
-      lessonProgress,
+      assessment,
+      completed,
+      cursor,
       setAge,
       toggleInterest: (i) =>
         setInterests((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])),
-      addXp: (n) => setXp((x) => x + n),
-      completeLessonTask: () => setLessonProgress((p) => Math.min(10, p + 1)),
-      assessment,
+      award: (questionId, amount) => {
+        if (rewarded.current.has(questionId)) return false;
+        rewarded.current.add(questionId);
+        setXp((x) => x + amount);
+        return true;
+      },
+      completeTask: (id) => setCompleted((prev) => (prev.includes(id) ? prev : [...prev, id])),
+      setCursor,
       saveAssessment,
     }),
-    [age, interests, xp, lessonProgress, assessment],
+    [age, interests, xp, assessment, completed, cursor],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
