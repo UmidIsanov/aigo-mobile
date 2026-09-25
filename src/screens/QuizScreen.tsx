@@ -25,7 +25,7 @@ export default function QuizScreen({ navigation }: StackProps<'Quiz'>) {
   };
 
   const next = () => {
-    if (isLast) return navigation.navigate('Insight');
+    if (isLast) return navigation.navigate('Check');
     setQ(q + 1);
     setPicked(null);
   };
@@ -36,7 +36,7 @@ export default function QuizScreen({ navigation }: StackProps<'Quiz'>) {
     >
       <View style={styles.top}>
         <View style={{ flex: 1 }}>
-          <Steps total={5} active={3} />
+          <Steps total={7} active={3} />
         </View>
         <Chip label={`+${earned} XP`} tone="accent" />
       </View>

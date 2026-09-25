@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AgeScreen from '../screens/AgeScreen';
+import CheckScreen from '../screens/CheckScreen';
 import HomeScreen from '../screens/HomeScreen';
 import InsightScreen from '../screens/InsightScreen';
 import InterestsScreen from '../screens/InterestsScreen';
@@ -51,6 +52,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Reality" component={RealityScreen} />
       <Stack.Screen name="Professions" component={ProfessionsScreen} />
       <Stack.Screen name="Quiz" component={QuizScreen} />
+      <Stack.Screen name="Check" component={CheckScreen} />
       <Stack.Screen name="Insight" component={InsightScreen} />
       <Stack.Screen name="Interests" component={InterestsScreen} />
       <Stack.Screen name="Main" component={MainTabs} />

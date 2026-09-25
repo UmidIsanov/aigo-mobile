@@ -13,9 +13,9 @@ export default function AgeScreen({ navigation }: StackProps<'Age'>) {
   const { age, setAge } = useApp();
   return (
     <Screen footer={<Button label="Дальше" disabled={!age} onPress={() => navigation.navigate('Reality')} />}>
-      <Steps total={5} active={0} />
+      <Steps total={7} active={0} />
       <Gap h={spacing.xl} />
-      <Chip label="Шаг 1 из 5" />
+      <Chip label="Шаг 1 из 7" />
       <Gap h={spacing.sm} />
       <Title>Сколько тебе лет?</Title>
       <Gap h={spacing.xs} />

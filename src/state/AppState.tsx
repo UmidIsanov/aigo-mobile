@@ -12,6 +12,9 @@ type AppState = {
   toggleInterest: (i: string) => void;
   addXp: (n: number) => void;
   completeLessonTask: () => void;
+  /** Onboarding thinking check: one entry per question, true if answered correctly. */
+  assessment: boolean[] | null;
+  saveAssessment: (answers: boolean[]) => void;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -21,6 +24,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [interests, setInterests] = useState<string[]>([]);
   const [xp, setXp] = useState(290);
   const [lessonProgress, setLessonProgress] = useState(3);
+  const [assessment, saveAssessment] = useState<boolean[] | null>(null);
 
   const value = useMemo<AppState>(
     () => ({
@@ -34,8 +38,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         setInterests((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i])),
       addXp: (n) => setXp((x) => x + n),
       completeLessonTask: () => setLessonProgress((p) => Math.min(10, p + 1)),
+      assessment,
+      saveAssessment,
     }),
-    [age, interests, xp, lessonProgress],
+    [age, interests, xp, lessonProgress, assessment],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -58,4 +64,11 @@ export function levelInfo(xp: number) {
     next: titles[Math.min(level, titles.length - 1)],
     inLevel: xp % XP_PER_LEVEL,
   };
+}
+
+export type AssessmentLevel = 'start' | 'middle' | 'advanced';
+
+export function assessmentLevel(score: number, total: number): AssessmentLevel {
+  if (score === total) return 'advanced';
+  return score >= Math.ceil(total / 2) ? 'middle' : 'start';
 }

@@ -4,7 +4,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Chip, Gap, ProgressBar, Screen } from '../components/ui';
 import { RootStackParamList, TabParamList } from '../navigation/types';
-import { levelInfo, useApp, XP_PER_LEVEL } from '../state/AppState';
+import { checkQuestions, levelNames, Skill, skillNames } from '../data/content';
+import { assessmentLevel, levelInfo, useApp, XP_PER_LEVEL } from '../state/AppState';
 import { colors, fonts, radius, spacing, type } from '../theme';
 
 type Props = CompositeScreenProps<
@@ -13,12 +14,21 @@ type Props = CompositeScreenProps<
 >;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { name, xp, lessonProgress, interests } = useApp();
+  const { name, xp, lessonProgress, interests, assessment } = useApp();
   const lvl = levelInfo(xp);
+  const level = assessment ? assessmentLevel(assessment.filter(Boolean).length, assessment.length) : null;
+
+  // Starting skill values come from the onboarding thinking check; lessons add critical-thinking practice.
+  const skillValue = (skill: Skill, bonus = 0) => {
+    const idx = checkQuestions.flatMap((q, i) => (q.skill === skill ? [i] : []));
+    const right = idx.filter((i) => assessment?.[i]).length;
+    return Math.min(100, 20 + Math.round((right / Math.max(1, idx.length)) * 50) + bonus);
+  };
   const skills = [
-    { name: 'Постановка задач для AI', value: 55, color: colors.bgBrand },
-    { name: 'Критическое мышление', value: 40, color: colors.bgDanger },
-    { name: 'Проверка фактов', value: 25 + (lessonProgress - 3) * 5, color: colors.bgInfo },
+    { name: skillNames.prompting, value: skillValue('prompting'), color: colors.bgBrand },
+    { name: skillNames.critical, value: skillValue('critical', (lessonProgress - 3) * 5), color: colors.bgDanger },
+    { name: skillNames.logic, value: skillValue('logic'), color: colors.bgInfo },
+    { name: skillNames.problem, value: skillValue('problem'), color: colors.bgAccent },
   ];
 
   return (
@@ -31,6 +41,7 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={[type.headingM, { color: colors.textPrimary }]}>Привет, {name}!</Text>
           <Text style={[type.bodyS, { color: colors.textSecondary }]}>
             Уровень {lvl.level} · {lvl.title}
+            {level ? ` · старт: ${levelNames[level]}` : ''}
           </Text>
         </View>
         <Chip label="5 дней" tone="danger" dot={colors.bgDanger} />

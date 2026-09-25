@@ -13,7 +13,7 @@ export default function ProfessionsScreen({ navigation }: StackProps<'Profession
 
   return (
     <Screen footer={<Button label="Проверь себя" onPress={() => navigation.navigate('Quiz')} />}>
-      <Steps total={5} active={2} />
+      <Steps total={7} active={2} />
       <Gap h={spacing.xl} />
       <Chip label={`Пример ${index + 1} из ${professions.length}`} tone="info" />
       <Gap h={spacing.sm} />

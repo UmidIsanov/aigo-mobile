@@ -13,6 +13,7 @@ export type RootStackParamList = {
   Reality: undefined;
   Professions: undefined;
   Quiz: undefined;
+  Check: undefined;
   Insight: undefined;
   Interests: undefined;
   Main: NavigatorScreenParams<TabParamList>;

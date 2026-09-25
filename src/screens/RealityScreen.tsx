@@ -6,7 +6,7 @@ import { colors, fonts, radius, spacing, type } from '../theme';
 export default function RealityScreen({ navigation }: StackProps<'Reality'>) {
   return (
     <Screen footer={<Button label="Покажи на примерах" onPress={() => navigation.navigate('Professions')} />}>
-      <Steps total={5} active={1} />
+      <Steps total={7} active={1} />
       <Gap h={spacing.xl} />
       <Chip label="Что происходит сейчас" tone="danger" dot={colors.bgDanger} />
       <Gap h={spacing.sm} />

@@ -30,6 +30,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       Reality: 'reality',
       Professions: 'professions',
       Quiz: 'quiz',
+      Check: 'check',
       Insight: 'insight',
       Interests: 'interests',
       Main: { screens: { Home: 'home', Path: 'path', Portfolio: 'portfolio' } },

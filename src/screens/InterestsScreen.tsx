@@ -22,7 +22,7 @@ export default function InterestsScreen({ navigation }: StackProps<'Interests'>)
         />
       }
     >
-      <Steps total={5} active={4} />
+      <Steps total={7} active={6} />
       <Gap h={spacing.xl} />
       <Chip label="Последний шаг" />
       <Gap h={spacing.sm} />

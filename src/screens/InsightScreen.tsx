@@ -12,7 +12,7 @@ const points = [
 export default function InsightScreen({ navigation }: StackProps<'Insight'>) {
   return (
     <Screen dark footer={<Button label="Я готов(а) учиться" variant="accent" onPress={() => navigation.navigate('Interests')} />}>
-      <Steps total={5} active={4} dark />
+      <Steps total={7} active={5} dark />
       <Gap h={spacing.xl} />
       <Chip label="Главное" tone="accent" style={{ backgroundColor: colors.bgAccent }} />
       <Gap h={spacing.md} />
